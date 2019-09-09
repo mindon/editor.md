@@ -53,6 +53,7 @@
                                             return (settings.imageUpload) ? "<div class=\"" + classPrefix + "file-input\">" +
                                                                                 "<input type=\"file\" name=\"" + classPrefix + "image-file\" accept=\"image/*\" />" +
                                                                                 "<input type=\"submit\" value=\"" + imageLang.uploadButton + "\" />" +
+						    				(settings.imageUploadParams ? settings.imageUploadParams.map(fld=>`<input type="${fld.type||'hidden'}" name="${fld.name}" value="${fld.value}" />`).join(""):"") +
                                                                             "</div>" : "";
                                         })() +
                                         "<br/>" +
