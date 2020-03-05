@@ -3402,6 +3402,10 @@
         var faIconReg       = regexs.fontAwesome;
         var editormdLogoReg = regexs.editormdLogo;
         var pageBreakReg    = regexs.pageBreak;
+	var plainText = function(s) {
+          var t = document.createElement('div'); t.innerHTML = s;
+          var c = t.innerText || t.textContent || '--'; t = null; return c;
+        }
 
         markedRenderer.emoji = function(text) {
             
@@ -3501,14 +3505,13 @@
         markedRenderer.link = function (href, title, text) {
 
             if (this.options.sanitize) {
+		var prot = href;
                 try {
-                    var prot = decodeURIComponent(unescape(href)).replace(/[^\w:]/g,"").toLowerCase();
-                } catch(e) {
-                    return "";
-                }
-
-                if (prot.indexOf("javascript:") === 0) {
-                    return "";
+                    prot = decodeURIComponent(unescape(href));
+                } catch(e) {}
+		prot = plainText(prot)
+                if (prot.match(/^javascript:/i)) {
+                    return i+"[!]";
                 }
             }
 
