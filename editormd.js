@@ -7,7 +7,7 @@
  * @license     MIT License
  * @author      Pandao
  * {@link       https://github.com/pandao/editor.md}
- * @updateTime  2015-06-09
+ * @updateTime  2020-03-05
  */
 
 ;(function(factory) {
@@ -365,7 +365,7 @@
             
             var _this            = this;
             var classPrefix      = this.classPrefix  = editormd.classPrefix; 
-            var settings         = this.settings     = $.extend(true, {}, editormd.defaults, options);
+            var settings         = this.settings     = $.extend(true, editormd.defaults, options);
             
             id                   = (typeof id === "object") ? settings.id : id;
             
@@ -1630,17 +1630,14 @@
                             case 120:
                                     $.proxy(toolbarHandlers["watch"], _this)();
                                     return false;
-                                break;
                                 
                             case 121:
                                     $.proxy(toolbarHandlers["preview"], _this)();
                                     return false;
-                                break;
                                 
                             case 122:
                                     $.proxy(toolbarHandlers["fullscreen"], _this)();                        
                                     return false;
-                                break;
                                 
                             default:
                                 break;
@@ -1965,15 +1962,14 @@
         
         save : function() {
             
-            var _this            = this;
-            var state            = this.state;
-            var settings         = this.settings;
-
-            if (timer === null && !(!settings.watch && state.preview))
+            if (timer === null)
             {
                 return this;
             }
             
+            var _this            = this;
+            var state            = this.state;
+            var settings         = this.settings;
             var cm               = this.cm;            
             var cmValue          = cm.getValue();
             var previewContainer = this.previewContainer;
@@ -3183,121 +3179,124 @@
         }
     };
     
-    editormd.keyMaps = {
-        "Ctrl-1"       : "h1",
-        "Ctrl-2"       : "h2",
-        "Ctrl-3"       : "h3",
-        "Ctrl-4"       : "h4",
-        "Ctrl-5"       : "h5",
-        "Ctrl-6"       : "h6",
-        "Ctrl-B"       : "bold",  // if this is string ==  editormd.toolbarHandlers.xxxx
-        "Ctrl-D"       : "datetime",
+    var isMac = navigator.platform.toUpperCase().indexOf('MAC')>=0;
+    var key = isMac ? "Cmd" : "Ctrl";
+    
+    var keyMaps = {};
+    keyMaps[key + "-1"] = "h1";
+    keyMaps[key + "-2"] = "h2";
+    keyMaps[key + "-3"] = "h3";
+    keyMaps[key + "-4"] = "h4";
+    keyMaps[key + "-5"] = "h5";
+    keyMaps[key + "-6"] = "h6";
+    keyMaps[key + "-B"] = "bold";  // if this is string ==  editormd.toolbarHandlers.xxxx
+    keyMaps[key + "-D"] = "datetime";
         
-        "Ctrl-E"       : function() { // emoji
-            var cm        = this.cm;
-            var cursor    = cm.getCursor();
-            var selection = cm.getSelection();
-            
-            if (!this.settings.emoji)
-            {
-                alert("Error: settings.emoji == false");
-                return ;
-            }
-
-            cm.replaceSelection(":" + selection + ":");
-
-            if (selection === "") {
-                cm.setCursor(cursor.line, cursor.ch + 1);
-            }
-        },
-        "Ctrl-Alt-G"   : "goto-line",
-        "Ctrl-H"       : "hr",
-        "Ctrl-I"       : "italic",
-        "Ctrl-K"       : "code",
+    keyMaps[key + "Ctrl-E"] = function() { // emoji
+        var cm        = this.cm;
+        var cursor    = cm.getCursor();
+        var selection = cm.getSelection();
         
-        "Ctrl-L"        : function() {
-            var cm        = this.cm;
-            var cursor    = cm.getCursor();
-            var selection = cm.getSelection();
-            
-            var title = (selection === "") ? "" : " \""+selection+"\"";
+        if (!this.settings.emoji)
+        {
+            alert("Error: settings.emoji == false");
+            return ;
+        }
 
-            cm.replaceSelection("[" + selection + "]("+title+")");
+        cm.replaceSelection(":" + selection + ":");
 
-            if (selection === "") {
-                cm.setCursor(cursor.line, cursor.ch + 1);
-            }
-        },
-        "Ctrl-U"         : "list-ul",
-        
-        "Shift-Ctrl-A"   : function() {
-            var cm        = this.cm;
-            var cursor    = cm.getCursor();
-            var selection = cm.getSelection();
-            
-            if (!this.settings.atLink)
-            {
-                alert("Error: settings.atLink == false");
-                return ;
-            }
-
-            cm.replaceSelection("@" + selection);
-
-            if (selection === "") {
-                cm.setCursor(cursor.line, cursor.ch + 1);
-            }
-        },
-        
-        "Shift-Ctrl-C"     : "code",
-        "Shift-Ctrl-Q"     : "quote",
-        "Shift-Ctrl-S"     : "del",
-        "Shift-Ctrl-K"     : "tex",  // KaTeX
-        
-        "Shift-Alt-C"      : function() {
-            var cm        = this.cm;
-            var cursor    = cm.getCursor();
-            var selection = cm.getSelection();
-            
-            cm.replaceSelection(["```", selection, "```"].join("\n"));
-
-            if (selection === "") {
-                cm.setCursor(cursor.line, cursor.ch + 3);
-            } 
-        },
-        
-        "Shift-Ctrl-Alt-C" : "code-block",
-        "Shift-Ctrl-H"     : "html-entities",
-        "Shift-Alt-H"      : "help",
-        "Shift-Ctrl-E"     : "emoji",
-        "Shift-Ctrl-U"     : "uppercase",
-        "Shift-Alt-U"      : "ucwords",
-        "Shift-Ctrl-Alt-U" : "ucfirst",
-        "Shift-Alt-L"      : "lowercase",
-        
-        "Shift-Ctrl-I"     : function() {
-            var cm        = this.cm;
-            var cursor    = cm.getCursor();
-            var selection = cm.getSelection();
-            
-            var title = (selection === "") ? "" : " \""+selection+"\"";
-
-            cm.replaceSelection("![" + selection + "]("+title+")");
-
-            if (selection === "") {
-                cm.setCursor(cursor.line, cursor.ch + 4);
-            }
-        },
-        
-        "Shift-Ctrl-Alt-I" : "image",
-        "Shift-Ctrl-L"     : "link",
-        "Shift-Ctrl-O"     : "list-ol",
-        "Shift-Ctrl-P"     : "preformatted-text",
-        "Shift-Ctrl-T"     : "table",
-        "Shift-Alt-P"      : "pagebreak",
-        "F9"               : "watch",
-        "F10"              : "preview",
-        "F11"              : "fullscreen",
+        if (selection === "") {
+            cm.setCursor(cursor.line, cursor.ch + 1);
+        }
     };
+    keyMaps[key + "-Alt-G"] = "goto-line";
+    keyMaps[key + "-H"] = "hr";
+    keyMaps[key + "-I"] = "italic";
+    keyMaps[key + "-K"] = "code";
+    
+    keyMaps["Ctrl-L"] = function() {
+        var cm        = this.cm;
+        var cursor    = cm.getCursor();
+        var selection = cm.getSelection();
+        
+        var title = (selection === "") ? "" : " \""+selection+"\"";
+
+        cm.replaceSelection("[" + selection + "]("+title+")");
+
+        if (selection === "") {
+            cm.setCursor(cursor.line, cursor.ch + 1);
+        }
+    };
+    keyMaps[key + "-U"] = "list-ul";
+    
+    keyMaps["Shift-Ctrl-A"] = function() {
+        var cm        = this.cm;
+        var cursor    = cm.getCursor();
+        var selection = cm.getSelection();
+        
+        if (!this.settings.atLink)
+        {
+            alert("Error: settings.atLink == false");
+            return ;
+        }
+
+        cm.replaceSelection("@" + selection);
+
+        if (selection === "") {
+            cm.setCursor(cursor.line, cursor.ch + 1);
+        }
+    };
+    
+    keyMaps["Shift-" + key + "-C"] = "code";
+    keyMaps["Shift-" + key + "-Q"] = "quote";
+    keyMaps["Shift-" + key + "-S"] = "del";
+    keyMaps["Shift-" + key + "-K"] = "tex";  // KaTeX
+    
+    keyMaps["Shift-Alt-C"] = function() {
+        var cm        = this.cm;
+        var cursor    = cm.getCursor();
+        var selection = cm.getSelection();
+        
+        cm.replaceSelection(["```", selection, "```"].join("\n"));
+
+        if (selection === "") {
+            cm.setCursor(cursor.line, cursor.ch + 3);
+        } 
+    };
+    
+    keyMaps["Shift-" + key + "-Alt-C"] = "code-block";
+    keyMaps["Shift-" + key + "-H"] = "html-entities";
+    keyMaps["Shift-Alt-H"] = "help";
+    keyMaps["Shift-" + key + "-E"] = "emoji";
+    keyMaps["Shift-" + key + "-U"] = "uppercase";
+    keyMaps["Shift-Alt-U"] = "ucwords";
+    keyMaps["Shift-" + key + "-Alt-U"] = "ucfirst";
+    keyMaps["Shift-Alt-L"] = "lowercase";
+    
+    keyMaps["Shift-" + key + "-I"] = function() {
+        var cm        = this.cm;
+        var cursor    = cm.getCursor();
+        var selection = cm.getSelection();
+        
+        var title = (selection === "") ? "" : " \""+selection+"\"";
+
+        cm.replaceSelection("![" + selection + "]("+title+")");
+
+        if (selection === "") {
+            cm.setCursor(cursor.line, cursor.ch + 4);
+        }
+    };
+    
+    keyMaps["Shift-" + key + "-Alt-I"] = "image";
+    keyMaps["Shift-" + key + "-L"] = "link";
+    keyMaps["Shift-" + key + "-O"] = "list-ol";
+    keyMaps["Shift-" + key + "-P"] = "preformatted-text";
+    keyMaps["Shift-" + key + "-T"] = "table";
+    keyMaps["Shift-Alt-P"] = "pagebreak";
+    keyMaps["F9"] = "watch";
+    keyMaps["F10"] = "preview";
+    keyMaps["F11"] = "fullscreen";
+    editormd.keyMaps = keyMaps;
     
     /**
      * 清除字符串两边的空格
@@ -3356,7 +3355,7 @@
         email         : /(\w+)@(\w+)\.(\w+)\.?(\w+)?/g,
         emailLink     : /(mailto:)?([\w\.\_]+)@(\w+)\.(\w+)\.?(\w+)?/g,
         emoji         : /:([\w\+-]+):/g,
-        emojiDatetime : /(\d{2}:\d{2}:\d{2})/g,
+        emojiDatetime : /(\d{1,2}:\d{1,2}:\d{1,2})/g,
         twemoji       : /:(tw-([\w]+)-?(\w+)?):/g,
         fontAwesome   : /:(fa-([\w]+)(-(\w+)){0,}):/g,
         editormdLogo  : /:(editormd-logo-?(\w+)?):/g,
@@ -3365,7 +3364,7 @@
 
     // Emoji graphics files url path
     editormd.emoji     = {
-        path  : "https://www.webpagefx.com/tools/emoji-cheat-sheet/graphics/emojis/",
+        path  : "http://www.emoji-cheat-sheet.com/graphics/emojis/",
         ext   : ".png"
     };
 
@@ -3412,6 +3411,10 @@
         var faIconReg       = regexs.fontAwesome;
         var editormdLogoReg = regexs.editormdLogo;
         var pageBreakReg    = regexs.pageBreak;
+        var plainText = function(s) {
+            var t = document.createElement('div'); t.innerHTML = s;
+            var c = t.innerText || t.textContent || '--'; t = null; return c;
+        };
 
         markedRenderer.emoji = function(text) {
             
@@ -3511,14 +3514,13 @@
         markedRenderer.link = function (href, title, text) {
 
             if (this.options.sanitize) {
+                var prot = href;
                 try {
-                    var prot = decodeURIComponent(unescape(href)).replace(/[^\w:]/g,"").toLowerCase();
-                } catch(e) {
-                    return "";
-                }
-
-                if (prot.indexOf("javascript:") === 0) {
-                    return "";
+                    prot = decodeURIComponent(unescape(href));
+                } catch(e) {}
+                prot = plainText(prot);
+                if (prot.match(/^javascript:/i)) {
+                    return i+"[!]";
                 }
             }
 
@@ -3546,13 +3548,13 @@
         markedRenderer.heading = function(text, level, raw) {
                     
             var linkText       = text;
-            var hasLinkReg     = /\s*\<a\s*href\=\"(.*)\"\s*([^\>]*)\>(.*)\<\/a\>\s*/;
-            var getLinkTextReg = /\s*\<a\s*([^\>]+)\>([^\>]*)\<\/a\>\s*/g;
+            var hasLinkReg     = /\s*<a\s*href\=\"(.*)\"\s*([^>]*)>(.*)<\/a>\s*/;
+            var getLinkTextReg = /\s*<a\s*([^>]+)>([^>]*)<\/a>\s*/g;
 
             if (hasLinkReg.test(text)) 
             {
                 var tempText = [];
-                text         = text.split(/\<a\s*([^\>]+)\>([^\>]*)\<\/a\>/);
+                text         = text.split(/<a\s*([^>]+)>([^>]*)<\/a>/);
 
                 for (var i = 0, len = text.length; i < len; i++)
                 {
@@ -3727,7 +3729,7 @@
             tocContainer.wrap("<div class=\"" + classPrefix + "toc-menu\"></div><br/>");
         }
         
-        tocContainer.html("<ul class=\"markdown-toc-list\"></ul>").children(".markdown-toc-list").html(html.replace(/\r?\n?\<ul\>\<\/ul\>/g, ""));
+        tocContainer.html("<ul class=\"markdown-toc-list\"></ul>").children(".markdown-toc-list").html(html.replace(/\r?\n?<ul><\/ul>/g, ""));
         
         return tocContainer;
     };
@@ -3825,14 +3827,14 @@
         {
             var tag = filterTags[i];
 
-            html = html.replace(new RegExp("\<\s*" + tag + "\s*([^\>]*)\>([^\>]*)\<\s*\/" + tag + "\s*\>", "igm"), "");
+            html = html.replace(new RegExp("<\s*" + tag + "\s*([^>]*)>([^>]*)<\s*\/" + tag + "\s*>", "igm"), "");
         }
         
         //return html;
 
         if (typeof attrs !== "undefined")
         {
-            var htmlTagRegex = /\<(\w+)\s*([^\>]*)\>([^\>]*)\<\/(\w+)\>/ig;
+            var htmlTagRegex = /<(\w+)\s*([^>]*)>([^>]*)<\/(\w+)>/ig;
 
             if (attrs === "*")
             {
